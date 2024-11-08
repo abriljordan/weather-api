@@ -1,0 +1,88 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .weather-container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+        input[type="text"], button {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .weather-data {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="weather-container">
+    <h2>Weather App</h2>
+    <input type="text" id="cityInput" placeholder="Enter city name" />
+    <button onclick="fetchWeather()">Submit</button>
+    
+    <div class="weather-data" id="weatherData" aria-live="polite">
+        <!-- Weather data will display here -->
+    </div>
+</div>
+
+<script>
+   async function fetchWeather() {
+       const city = document.getElementById('cityInput').value.trim();
+       if (!city) {
+           document.getElementById('weatherData').innerHTML = `<p>Please enter a city name.</p>`;
+           return;
+       }
+       const url = `/weather?city=${city}`;
+
+       try {
+           const response = await fetch(url);
+
+           // Check if response is OK (status 200)
+           if (!response.ok) {
+               throw new Error(`Server responded with ${response.status}`);
+           }
+
+           const data = await response.json();
+
+           if (data.error) {
+               document.getElementById('weatherData').innerHTML = `<p>${data.error}</p>`;
+               return;
+           }
+
+           document.getElementById('weatherData').innerHTML = `
+               <p><strong>City:</strong> ${data.name}</p>
+               <p><strong>Temperature:</strong> ${data.main.temp}°C (Feels like ${data.main.feels_like}°C)</p>
+               <p><strong>Conditions:</strong> ${data.weather[0].description}</p>
+               <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
+               <p><strong>Wind Speed:</strong> ${data.wind.speed} m/s</p>
+           `;
+       } catch (error) {
+           console.error('Error:', error);
+           document.getElementById('weatherData').innerHTML = `<p>Failed to fetch weather data: ${error.message}</p>`;
+       }
+   }
+</script>
+
+</body>
+</html>
